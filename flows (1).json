@@ -1,0 +1,378 @@
+[
+    {
+        "id": "cc0b285d.ab4a48",
+        "type": "tab",
+        "label": "フロー 1",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "2ed37735.0e6288",
+        "type": "inject",
+        "z": "cc0b285d.ab4a48",
+        "name": "trigger",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 140,
+        "wires": [
+            [
+                "7b616c2d.cab6d4"
+            ]
+        ]
+    },
+    {
+        "id": "ffffb15a.793f4",
+        "type": "postgres",
+        "z": "cc0b285d.ab4a48",
+        "postgresdb": "6676a187.16a4a",
+        "name": "FirstDataLake",
+        "output": true,
+        "perrow": false,
+        "rowspermsg": "1",
+        "outputs": 1,
+        "x": 640,
+        "y": 140,
+        "wires": [
+            [
+                "a4c88bac.38e178"
+            ]
+        ]
+    },
+    {
+        "id": "7b616c2d.cab6d4",
+        "type": "function",
+        "z": "cc0b285d.ab4a48",
+        "name": "setup params",
+        "func": "msg.queryParameters = msg.queryParameters || {};\nmsg.queryParameters.param1 = 1;\nmsg.queryParameters.maxCount = 0;\nmsg.queryParameters.offset = 0;\nmsg.queryParameters.limit = 10;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 280,
+        "y": 160,
+        "wires": [
+            [
+                "441fa8a7.8d6dc8"
+            ]
+        ]
+    },
+    {
+        "id": "be96c0b9.ed7fd",
+        "type": "postgres",
+        "z": "cc0b285d.ab4a48",
+        "postgresdb": "6676a187.16a4a",
+        "name": "IotComPasMart",
+        "output": true,
+        "perrow": false,
+        "rowspermsg": "1",
+        "outputs": 1,
+        "x": 1100,
+        "y": 440,
+        "wires": [
+            [
+                "7d8ec7f8.d991f8"
+            ]
+        ]
+    },
+    {
+        "id": "eb220165.44586",
+        "type": "function",
+        "z": "cc0b285d.ab4a48",
+        "name": "ConvertData",
+        "func": "for (let i = 0; i < msg.payload.length; i++) {\n  msg.payload[i].field1 = `field1-${i}`;\n}\nreturn msg;\n\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 870,
+        "y": 320,
+        "wires": [
+            [
+                "e936118f.f888d"
+            ]
+        ]
+    },
+    {
+        "id": "e936118f.f888d",
+        "type": "debug",
+        "z": "cc0b285d.ab4a48",
+        "name": "query output",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1050,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "7d8ec7f8.d991f8",
+        "type": "debug",
+        "z": "cc0b285d.ab4a48",
+        "name": "query output",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "",
+        "targetType": "jsonata",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1250,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "c54e58f2.228538",
+        "type": "catch",
+        "z": "cc0b285d.ab4a48",
+        "name": "",
+        "scope": null,
+        "uncaught": false,
+        "x": 130,
+        "y": 80,
+        "wires": [
+            [
+                "ffad3cc7.8ae41"
+            ]
+        ]
+    },
+    {
+        "id": "ffad3cc7.8ae41",
+        "type": "debug",
+        "z": "cc0b285d.ab4a48",
+        "name": "error",
+        "active": true,
+        "tosidebar": true,
+        "console": true,
+        "tostatus": true,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "error",
+        "statusType": "auto",
+        "x": 300,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "cd8f2c2c.80e12",
+        "type": "function",
+        "z": "cc0b285d.ab4a48",
+        "name": "InsertCompas",
+        "func": "var values = \"\";\nfor (let i = 0; i < msg.payload.length; i++) {\n    if((msg.payload.length-1) > i){\n        values += `('${msg.payload[i].field1}', ${msg.payload[i].field2}),`\n    }else{\n        values += `('${msg.payload[i].field1}', ${msg.payload[i].field2})`\n    }\n}\n\nvar qinsert = `insert into table1 values${values}`;\nmsg.payload=qinsert\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 1220,
+        "y": 520,
+        "wires": [
+            [
+                "be96c0b9.ed7fd"
+            ]
+        ]
+    },
+    {
+        "id": "441fa8a7.8d6dc8",
+        "type": "function",
+        "z": "cc0b285d.ab4a48",
+        "name": "SelectCount",
+        "func": "\nvar qcount = `select count(*) from table1`;\n\nmsg.payload=qcount\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 490,
+        "y": 100,
+        "wires": [
+            [
+                "ffffb15a.793f4"
+            ]
+        ]
+    },
+    {
+        "id": "18bc957a.5bba3b",
+        "type": "switch",
+        "z": "cc0b285d.ab4a48",
+        "name": "",
+        "property": "queryParameters.isLoop",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "1",
+                "vt": "num"
+            },
+            {
+                "t": "eq",
+                "v": "0",
+                "vt": "num"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 590,
+        "y": 520,
+        "wires": [
+            [
+                "927ae2e6.6c958"
+            ],
+            [
+                "739dee27.c5fbe"
+            ]
+        ]
+    },
+    {
+        "id": "ba9c88db.02ca28",
+        "type": "function",
+        "z": "cc0b285d.ab4a48",
+        "name": "SelectData",
+        "func": "\n\nvar qselect = `select * from table1 order by field1 \n                offset ${msg.queryParameters.offset}\n                limit ${msg.queryParameters.limit}`;\n\nmsg.payload=qselect\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 290,
+        "y": 360,
+        "wires": [
+            [
+                "d28bd0c0.bbd78"
+            ]
+        ]
+    },
+    {
+        "id": "d28bd0c0.bbd78",
+        "type": "postgres",
+        "z": "cc0b285d.ab4a48",
+        "postgresdb": "6676a187.16a4a",
+        "name": "FirstDataLake",
+        "output": true,
+        "perrow": false,
+        "rowspermsg": "1",
+        "outputs": 1,
+        "x": 480,
+        "y": 360,
+        "wires": [
+            [
+                "8d6745e9.92b648"
+            ]
+        ]
+    },
+    {
+        "id": "ba3b6a37.bac1c8",
+        "type": "debug",
+        "z": "cc0b285d.ab4a48",
+        "name": "query output",
+        "active": false,
+        "tosidebar": true,
+        "console": true,
+        "tostatus": true,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "payload",
+        "statusType": "auto",
+        "x": 960,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "a4c88bac.38e178",
+        "type": "function",
+        "z": "cc0b285d.ab4a48",
+        "name": "SelectCount",
+        "func": "\nmsg.queryParameters.maxCount = parseInt(msg.payload[0].count);\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 790,
+        "y": 180,
+        "wires": [
+            [
+                "ba3b6a37.bac1c8",
+                "ba9c88db.02ca28"
+            ]
+        ]
+    },
+    {
+        "id": "927ae2e6.6c958",
+        "type": "debug",
+        "z": "cc0b285d.ab4a48",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": true,
+        "tostatus": true,
+        "complete": "queryParameters",
+        "targetType": "msg",
+        "statusVal": "queryParameters.limit",
+        "statusType": "msg",
+        "x": 850,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "739dee27.c5fbe",
+        "type": "debug",
+        "z": "cc0b285d.ab4a48",
+        "name": "queryParameters.limit",
+        "active": true,
+        "tosidebar": true,
+        "console": true,
+        "tostatus": true,
+        "complete": "queryParameters",
+        "targetType": "msg",
+        "statusVal": "queryParameters",
+        "statusType": "auto",
+        "x": 810,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "8d6745e9.92b648",
+        "type": "function",
+        "z": "cc0b285d.ab4a48",
+        "name": "ConvertData",
+        "func": "for (let i = 0; i < msg.payload.length; i++) {\n  msg.payload[i].field1 = `field1-${i}`;\n}\n\nmsg.queryParameters.offset = msg.payload.length;\nmsg.queryParameters.limit = msg.queryParameters.offset + 10;\n\nif(msg.queryParameters.offset < msg.queryParameters.maxCount){\n    msg.queryParameters.isLoop = true;\n}else{\n    msg.queryParameters.isLoop = false;\n}\n\nreturn msg;\n\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 590,
+        "y": 420,
+        "wires": [
+            [
+                "18bc957a.5bba3b"
+            ]
+        ]
+    },
+    {
+        "id": "6676a187.16a4a",
+        "type": "postgresdb",
+        "z": "cc0b285d.ab4a48",
+        "hostname": "localhost",
+        "port": "5432",
+        "db": "postgres",
+        "ssl": false
+    }
+]
