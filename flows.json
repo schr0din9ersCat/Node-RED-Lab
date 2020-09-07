@@ -1,0 +1,222 @@
+[
+    {
+        "id": "cc0b285d.ab4a48",
+        "type": "tab",
+        "label": "フロー 1",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "2ed37735.0e6288",
+        "type": "inject",
+        "z": "cc0b285d.ab4a48",
+        "name": "trigger",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 140,
+        "wires": [
+            [
+                "7b616c2d.cab6d4"
+            ]
+        ]
+    },
+    {
+        "id": "ffffb15a.793f4",
+        "type": "postgres",
+        "z": "cc0b285d.ab4a48",
+        "postgresdb": "6676a187.16a4a",
+        "name": "FirstDataLake",
+        "output": true,
+        "perrow": false,
+        "rowspermsg": "",
+        "outputs": 1,
+        "x": 640,
+        "y": 200,
+        "wires": [
+            [
+                "eb220165.44586"
+            ]
+        ]
+    },
+    {
+        "id": "7b616c2d.cab6d4",
+        "type": "function",
+        "z": "cc0b285d.ab4a48",
+        "name": "setup params",
+        "func": "msg.queryParameters = msg.queryParameters || {};\nmsg.queryParameters.param1 = 1;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 280,
+        "y": 160,
+        "wires": [
+            [
+                "82a2006a.dda7d"
+            ]
+        ]
+    },
+    {
+        "id": "be96c0b9.ed7fd",
+        "type": "postgres",
+        "z": "cc0b285d.ab4a48",
+        "postgresdb": "6676a187.16a4a",
+        "name": "IotComPasMart",
+        "output": true,
+        "perrow": false,
+        "rowspermsg": "",
+        "outputs": 1,
+        "x": 1100,
+        "y": 360,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "eb220165.44586",
+        "type": "function",
+        "z": "cc0b285d.ab4a48",
+        "name": "ConvertData",
+        "func": "\n\n\nfor (let i = 0; i < msg.payload.length; i++) {\n  msg.payload[i].field1 = `field1-${i}`;\n}\nreturn msg;\n\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 730,
+        "y": 240,
+        "wires": [
+            [
+                "e936118f.f888d",
+                "cd8f2c2c.80e12"
+            ]
+        ]
+    },
+    {
+        "id": "e936118f.f888d",
+        "type": "debug",
+        "z": "cc0b285d.ab4a48",
+        "name": "query output",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 930,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "7d8ec7f8.d991f8",
+        "type": "debug",
+        "z": "cc0b285d.ab4a48",
+        "name": "query output",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1110,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "c54e58f2.228538",
+        "type": "catch",
+        "z": "cc0b285d.ab4a48",
+        "name": "",
+        "scope": null,
+        "uncaught": false,
+        "x": 130,
+        "y": 80,
+        "wires": [
+            [
+                "ffad3cc7.8ae41"
+            ]
+        ]
+    },
+    {
+        "id": "ffad3cc7.8ae41",
+        "type": "debug",
+        "z": "cc0b285d.ab4a48",
+        "name": "error",
+        "active": true,
+        "tosidebar": true,
+        "console": true,
+        "tostatus": true,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "error",
+        "statusType": "auto",
+        "x": 300,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "82a2006a.dda7d",
+        "type": "template",
+        "z": "cc0b285d.ab4a48",
+        "name": "",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "json",
+        "syntax": "mustache",
+        "template": "select * from table1",
+        "output": "str",
+        "x": 440,
+        "y": 200,
+        "wires": [
+            [
+                "ffffb15a.793f4"
+            ]
+        ]
+    },
+    {
+        "id": "cd8f2c2c.80e12",
+        "type": "function",
+        "z": "cc0b285d.ab4a48",
+        "name": "InsertCompas",
+        "func": "var values = \"\";\nfor (let i = 0; i < msg.payload.length; i++) {\n    if((msg.payload.length-1) > i){\n        values += `('${msg.payload[i].field1}', ${msg.payload[i].field2}),`\n    }else{\n        values += `('${msg.payload[i].field1}', ${msg.payload[i].field2})`\n    }\n}\n\nvar qinsert = `insert into table1 values${values}`;\n\nmsg.payload=qinsert\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 800,
+        "y": 320,
+        "wires": [
+            [
+                "7d8ec7f8.d991f8",
+                "be96c0b9.ed7fd"
+            ]
+        ]
+    },
+    {
+        "id": "6676a187.16a4a",
+        "type": "postgresdb",
+        "z": "cc0b285d.ab4a48",
+        "hostname": "localhost",
+        "port": "5432",
+        "db": "postgres",
+        "ssl": false
+    }
+]
